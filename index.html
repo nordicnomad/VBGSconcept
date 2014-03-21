@@ -1,0 +1,303 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+        <title>Fullscreen Video Slideshow</title>
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width">
+		<link rel="stylesheet" href="css/bigvideo.css">
+		<link rel="stylesheet" href="css/style.css">
+    	<script src="js/modernizr-2.5.3.min.js"></script>
+		
+	</head>
+	<body>
+		
+		<header id="welcomeMessage" class="visible">
+		    <h1>Fullscreen Video Slideshow <span>Example</span></h1>
+            <hr>
+		    <p>Great for splash pages<br>
+            &amp; Dealers that love videos?...</p>
+            <a href="#" class="contentLink"> Click me if I'm in your way</a>
+		</header>
+
+        <div id="fsportContent" class="contentWrapper moveContent">
+            <div class="contentContainer">
+            <h1 class="contentTitle">Videos On a Website?</h1>
+            <hr>
+                <p>This site uses <a href="http://dfcb.github.io/BigVideo.js/" target="_blank" class="contentLink">bigvideo.js</a> to place high resolution videos on a screen 'div' serving as the background. </p>
+                <p>But since that 100% screen ends up having a definable width based on the browser size, we can use that to create a slideshow! WEEEEE!</p>
+                <p>Anyway, these videos can either be silent and looping in the background or play through once with volume and controls and stuff. Click the buttons below to see the difference between the two.</p>
+                <hr>
+                <button id="AmbientFalse" class="toggleMode">Interactive</button>
+                <button id="AmbientTrue" class="toggleMode active">Ambient</button>
+                <hr>
+                
+            </div>
+        </div>
+
+        <div id="perfectionContent" class="contentWrapper moveContent">
+            <h1 class="contentTitle">But Why?</h1>
+            <hr>
+            <p>Aren't videos really big and hurtful to the feelings of people with slow internets? Oh yeah, and this site is no exception in that regard. People have monthly data plans smaller than the combined filesize of the videos you're watching here.</p>
+            <p>Thankfully, we speed up delivery a little bit by serving them directly instead of through a YouTube or Vimeo. And for those who presume to view the site on their mobile devices, we have an alternative mechanism in place you might have noticed.</p>
+            <hr>
+            <img src ="img/5hold.jpg" class="contentImage" />
+            <hr>
+            <p>The image above is the first frame from the video playing in the background. It's actually sitting on top of the video and only disappears when the video triggers a ready event. So in addition to a cool coming to life transition, people with slow connections are even more surprised because its a picture for much longer that suddenly turns into video.</p>
+            <p>Since videos don't auto play on touch devices (YET!) we use that same image as a replacement for the ambient videos. So mobile users just think you have a cool image slideshow background rather than wondering why there's a big play button on the page that they can't press.</p>
+        </div>
+		 
+        <div id="endContent" class="contentWrapper moveContent">
+            <h1 class="contentTitle">Thanks for Watching</h1>
+            <hr>
+            <p>Please direct complaints to:</p>
+            <p>Troy J Norris <br>
+            <em>Web Designer</em><br>
+            <a href="http://www.troyjnorris.com" class="contentLink">Troy.Norris@vinsolutions.com</a></p>
+            
+            <h3>For Comparisson</h3>
+            <hr>
+            <div class="iframeContain">
+                <iframe width="250" height="250" src="http://www.youtube.com/embed/Ts5CgjnNAVU" frameborder="0" allowfullscreen></iframe>
+            </div>
+            <hr>
+        </div>
+
+		<div class="wrapper">
+            <div class="screen" id="screen-1" data-video="mov/honored.mp4">
+                <img src="img/4hold.jpg" class="big-image" />
+                <h1 class="video-title">Time Honored</h1>
+            </div>
+		    <div class="screen" id="screen-2" data-video="mov/fsport.mp4">
+		        <img src="img/1hold.jpg" class="big-image" />
+		        <h1 class="video-title">Lexus F-Sport</h1>
+		    </div>
+		    <div class="screen" id="screen-3" data-video="mov/perfection.mp4">
+		        <img src="img/5hold.jpg" class="big-image" />
+		        <h1 class="video-title">Persue Perfection</h1>
+		    </div>
+		    <div class="screen" id="screen-4" data-video="mov/tribute.mp4">
+		        <img src="img/6hold.jpg" class="big-image" />
+		        <h1 class="video-title">The End</h1>
+		    </div>
+		</div>
+		 
+		<nav id="next-btn">
+		    <a href="#" class="next-icon"></a>
+		</nav>
+		
+
+		<!-- BigVideo Dependencies -->
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+		
+		<script src="js/jquery-ui-1.8.22.custom.min.js"></script>
+		<script src="js/jquery.imagesloaded.min.js"></script>
+		<script src="http://vjs.zencdn.net/c/video.js"></script>
+		 
+		<!-- BigVideo -->
+		<script src="js/bigvideo.js"></script>
+		 
+		<!-- Tutorial Demo -->
+		<script src="js/jquery.transit.min.js"></script>
+
+		<script>
+        $(function() {
+
+            // Use Modernizr to detect for touch devices, 
+            // which don't support autoplay and may have less bandwidth, 
+            // so just give them the poster images instead
+            var screenIndex = 1,
+                numScreens = $('.screen').length,
+                isTransitioning = false,
+                transitionDur = 1000,
+                BV,
+                videoPlayer,
+                isTouch = Modernizr.touch,
+                $bigImage = $('.big-image'),
+                $window = $(window);
+            
+            if (!isTouch) {
+                // initialize BigVideo
+                BV = new $.BigVideo({forceAutoplay:isTouch});
+                BV.init();
+                showVideo();
+                
+                BV.getPlayer().addEvent('loadeddata', function() {
+                    onVideoLoaded();
+                });
+
+                // adjust image positioning so it lines up with video
+                $bigImage
+                    .css('position','relative')
+                    .imagesLoaded(adjustImagePositioning);
+                // and on window resize
+                $window.on('resize', adjustImagePositioning);   
+            
+            }
+
+            
+            
+            // Next button click goes to next div
+            $('#next-btn').on('click', function(e) {
+                e.preventDefault();
+                $('#welcomeMessage').removeClass('visible');
+                $('#fsportContent').removeClass('visible');
+                $('#perfectionContent').removeClass('visible');
+                $('#endContent').removeClass('visible');
+                if (!isTransitioning) {
+                    next();
+                }
+
+            });
+
+            function showVideo() {
+                BV.show($('#screen-'+screenIndex).attr('data-video'),{ambient:true});
+            }
+
+            function showControlsVideo() {
+                BV.show($('#screen-'+screenIndex).attr('data-video'),{ambient:false});
+            }
+
+            function next() {
+                isTransitioning = true;
+                
+                // update video index, reset image opacity if starting over
+                if (screenIndex === numScreens) {
+                    $bigImage.css('opacity',1);
+                    screenIndex = 1;
+                } else {
+                    screenIndex++;
+                }
+                
+                setTimeout(waitOne, 1000);
+                function waitOne() {
+                    if(screenIndex !== 1) {
+                        if($('#welcomeMessage').hasClass('visible'))
+                        {
+                            $('#welcomeMessage').toggleClass('visible');
+                        }
+                    }
+                    else {
+                        if($('#welcomeMessage').hasClass('visible'))
+                        {}
+                        else{
+                            $('#welcomeMessage').toggleClass('visible');
+                        }
+                    }
+                    if(screenIndex === 2)
+                    {
+                        $('#fsportContent').addClass('visible');
+                        if($('#fsportContent').hasClass('moveContent'))
+                        {
+                            $('#fsportContent').toggleClass('moveContent');
+                        }
+                    }
+                    if(screenIndex === 3)
+                    {
+                        $('#perfectionContent').addClass('visible');
+                        if($('#perfectionContent').hasClass('moveContent'))
+                        {
+                            $('#perfectionContent').toggleClass('moveContent');
+                        }
+                    }
+                    if(screenIndex === 4)
+                    {
+                        $('#endContent').addClass('visible');
+                        
+                        if($('#endContent').hasClass('moveContent')) 
+                        {
+                            $('#endContent').toggleClass('moveContent');    
+
+                        }
+                    }
+                    
+                }
+
+                if (!isTouch) {
+                    $('#big-video-wrap').transit({'left':'-100%'},transitionDur)
+                }
+                    
+                (Modernizr.csstransitions)?
+                    $('.wrapper').transit(
+                        {'left':'-'+(100*(screenIndex-1))+'%'},
+                        transitionDur,
+                        onTransitionComplete):
+                    onTransitionComplete();
+            }
+
+            function onVideoLoaded() {
+                $('#screen-'+screenIndex).find('.big-image').transit({'opacity':0},500)
+            }
+
+            function onTransitionComplete() {
+                isTransitioning = false;
+                if (!isTouch) {
+                    $('#big-video-wrap').css('left',0);
+                    showVideo();
+                }
+            }
+
+            function adjustImagePositioning() {
+                $bigImage.each(function(){
+                    var $img = $(this),
+                        img = new Image();
+
+                    img.src = $img.attr('src');
+
+                    var windowWidth = $window.width(),
+                        windowHeight = $window.height(),
+                        r_w = windowHeight / windowWidth,
+                        i_w = img.width,
+                        i_h = img.height,
+                        r_i = i_h / i_w,
+                        new_w, new_h, new_left, new_top;
+
+                    if( r_w > r_i ) {
+                        new_h   = windowHeight;
+                        new_w   = windowHeight / r_i;
+                    }
+                    else {
+                        new_h   = windowWidth * r_i;
+                        new_w   = windowWidth;
+                    }
+
+                    $img.css({
+                        width   : new_w,
+                        height  : new_h,
+                        left    : ( windowWidth - new_w ) / 2,
+                        top     : ( windowHeight - new_h ) / 2
+                    })
+
+                });
+
+            }
+
+            $('#welcomeMessage').click(function(){
+                $('#welcomeMessage').toggleClass('moveHeader');
+            });
+            $('#fsportContent').click(function(){
+                $('#fsportContent').toggleClass('moveContent');
+            });
+            $('#perfectionContent').click(function(){
+                $('#perfectionContent').toggleClass('moveContent');
+            });
+            $('#endContent').click(function(){
+                $('#endContent').toggleClass('moveContent');
+            });
+
+            $('#AmbientFalse').click(function(){
+                $('#AmbientFalse').addClass('active');
+                $('#AmbientTrue').removeClass('active');
+
+                showControlsVideo();
+            });
+            $('#AmbientTrue').click(function(){
+                $('#AmbientFalse').removeClass('active');
+                $('#AmbientTrue').addClass('active');
+
+                showVideo();
+            });
+        });
+    </script>
+		
+	</body>
+</html>
